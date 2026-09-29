@@ -469,6 +469,59 @@ return_df =
     values_to = &quot;words&quot;
   )</code></pre>
 </div>
+<div id="join-fas-datasets" class="section level2">
+<h2>join FAS datasets</h2>
+<p>import both</p>
+<pre class="r"><code>pups_df =
+  read_csv(
+    &quot;data/FAS_pups.csv&quot;,
+    skip = 3,
+    na = c(&quot;NA&quot;,&quot;na&quot;,&quot;.&quot;)
+    ) |&gt; 
+  janitor::clean_names() |&gt;
+  mutate(
+    sex = case_match(
+      sex,
+      1 ~ &quot;male&quot;,
+      2 ~ &quot;female&quot;
+    )
+  )</code></pre>
+<pre><code>## Rows: 313 Columns: 6
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (1): Litter Number
+## dbl (5): Sex, PD ears, PD eyes, PD pivot, PD walk
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>litters_df =
+  read_csv(
+    &quot;data/FAS_litters.csv&quot;,
+    na = c(&quot;NA&quot;,&quot;na&quot;,&quot;.&quot;)
+    ) |&gt; 
+  janitor::clean_names() |&gt; 
+  relocate(litter_number) |&gt; 
+  separate(group, into = c(&quot;dose&quot;, &quot;day_of_tx&quot;), 3) |&gt; 
+  mutate(
+    dose = str_to_lower(dose),
+    day_of_tx = as.numeric(day_of_tx),
+    gd_weight_gain = gd18_weight - gd0_weight
+  )</code></pre>
+<pre><code>## Warning: One or more parsing issues, call `problems()` on your data frame for details,
+## e.g.:
+##   dat &lt;- vroom(...)
+##   problems(dat)</code></pre>
+<pre><code>## Rows: 49 Columns: 8
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (2): Group, Litter Number
+## dbl (6): GD0 weight, GD18 weight, GD of Birth, Pups born alive, Pups dead @ ...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>fas_df = 
+  left_join(pups_df, litters_df, by = &quot;litter_number&quot;) </code></pre>
+</div>
 
 
 
